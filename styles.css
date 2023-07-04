@@ -1,0 +1,42 @@
+body{
+    margin-top: 0;
+    padding: 0;
+    /*
+    margin-left: 40px;
+    margin-right: 40px;
+    */
+}
+.container-selected-movie{
+    border: solid blue 2px;
+    width: 100%;
+    height: 500px;
+}
+.container-movie{
+    border: solid black 2px;
+    display: flex;
+}
+.box-movie{
+    border: dotted purple 1px;
+    width: 17%;
+    height: 150px;
+}
+header{
+    background-color: grey;
+    font-size: 40px;
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+}
+header p{
+    margin: 20px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+h1{
+    margin: 0;
+    border: solid black;
+}
+.box-movie p{
+    margin: 0;
+    padding: 0;
+}
