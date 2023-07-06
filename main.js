@@ -1,7 +1,7 @@
 const urlAPI = "http://localhost:8000/api/v1/";
 const categoriesNumber = 4;
 const categories = [];
-const movieBoxPerCategory = 5;
+const movieBoxPerCategory = 7;
 
 class Category{
     defaultMovieLink = "https://caer.univ-amu.fr/wp-content/uploads/default-placeholder.png";
@@ -24,6 +24,8 @@ class Category{
         this.title = null;
         this.fetchResponse = null; //type : Promise
         this.boxMovieList = [];
+        this.carousselPage = 1;
+        this.movieListFromAPI = []; //contains dictionnaries of movie info {id:value, img-src:value}
     }
     setTitle(title){
         this.title = title;
@@ -44,37 +46,60 @@ class Category{
     }
     setFetchResult(fetchResponse){
         this.fetchResponse = fetchResponse
-        this.displayMovieGroup(fetchResponse.results)
+        for (i in this.fetchResponse.results){
+            this.movieListFromAPI.push(fetchResponse.results[i])
+        }
     }
-    displayMovieGroup(promiseResultList){
-        for (i in this.boxMovieList){
+    fillMovieList(){
+        //checks if there are enough movies in movieListFromAPI
+        if (this.movieListFromAPI.length > this.carousselPage * movieBoxPerCategory
+            || this.fetchResponse.next == null){
+            this.displayMovieGroup()
+            return;
+        }
+        getDataFromAPI(this.fetchResponse.next)
+        .then((response) => {
+            this.setFetchResult(response);
+            this.fillMovieList();           
+        })
+    }
+    displayMovieGroup(){
+        let firstFilmIndex = (this.carousselPage - 1) * movieBoxPerCategory + 1
+        let lastFilmIndex = this.carousselPage * movieBoxPerCategory
+        let firstFilmIndexOffset = (this.carousselPage - 1) * movieBoxPerCategory
+
+        for (i = 0; i <= movieBoxPerCategory-1; i++){
             let movieBox = this.boxMovieList[i];
-            if (i <= promiseResultList.length - 1){
-                movieBox.imageSelector.setAttribute("src", promiseResultList[i].image_url);
+            // only modify image source if enough images to display
+            if (i <= this.movieListFromAPI.length - 1){
+                movieBox.imageSelector.setAttribute("src", this.movieListFromAPI[i + firstFilmIndexOffset].image_url);
+                movieBox.movieID = this.movieListFromAPI[i +firstFilmIndexOffset].id;
+                movieBox.imageSelector.style.display = 'inline-block';
+            }else{
+                movieBox.imageSelector.style.display = 'none';
             }
         }
     }
     clickNext(){
         if (this.fetchResponse.next != null){
-            getDataFromAPI(this.fetchResponse.next)
-            .then((response) => {
-                this.setFetchResult(response);
-            })
+            this.carousselPage++
+            this.fillMovieList();
         }
     }
     clickPrevious(){
-        if (this.fetchResponse.previous != null){
-            getDataFromAPI(this.fetchResponse.previous)
-            .then((response) => {
-                this.setFetchResult(response);
-            })
+
+        if (this.carousselPage > 1){
+            this.carousselPage--
+        
+            this.displayMovieGroup()
         }
     }
 }
 class boxMovie{
-    constructor(divSelector, imageSelector){
+    constructor(divSelector, imageSelector, id){
         this.divSelector = divSelector;
-        this.imageSelector = imageSelector
+        this.imageSelector = imageSelector;
+        this.movieID = id;
     }
 }
 
@@ -94,8 +119,8 @@ function getUserFavouriteCategories(categoriesFromAPI = []){
         ];    
     }else{
         favouriteCategories.push(categoriesFromAPI[0])
-        favouriteCategories.push(categoriesFromAPI[1])
-        favouriteCategories.push(categoriesFromAPI[3])
+        favouriteCategories.push(categoriesFromAPI[2])
+        favouriteCategories.push(categoriesFromAPI[4])
     }
     return favouriteCategories
 }
@@ -117,15 +142,34 @@ function setUpCategories(categoriesListFromAPI){
 
 function setUpMoviesInCategory(){
     for (let i in categories){
-        if (i != 0){
-            let category = categories[i]
-            getDataFromAPI(urlAPI + `titles/?genre=${category.title}`)
-            .then(function(response){
-                category.setFetchResult(response)
-            })
-        }
+        let category = categories[i]
+        let categoryUrl = ""
+
+        if (i == 0){
+            categoryUrl = urlAPI + `titles/?sort_by=-imdb_score`
+        }else{
+            categoryUrl = urlAPI + `titles/?genre=${category.title}`
+        };
+
+        getDataFromAPI(categoryUrl)
+        .then(function(response){
+            category.setFetchResult(response)
+            category.fillMovieList()
+            category.displayMovieGroup()
+            
+            // set front page film
+            if (i == 0){
+                setUpFrontPageFilm(category.movieListFromAPI[0])
+            }
+        })
     }
 };
+
+function setUpFrontPageFilm(firstFilmResponse){
+    console.log(firstFilmResponse)
+    document.querySelector(".image-main").setAttribute("src", firstFilmResponse.image_url)
+    document.querySelector(".main-movie-title").textContent = firstFilmResponse.title
+}
 
 // page initialization
 getDataFromAPI(urlAPI + "genres/")
