@@ -15,11 +15,12 @@ body{
     border: solid black 2px;
     display: flex;
     justify-content: space-between;
+    width: 100%;
 }
 .box-movie{
     border: dotted purple 1px;
-    width: 16%;
-    height: 150px;
+    width: 13%;
+    height: 350px;
 }
 
 header{
@@ -35,8 +36,10 @@ header p{
     margin-bottom: 0;
 }
 h1{
+    padding-left: 70px;
     margin: 0;
     border: solid black;
+    font-size: 35px;
 }
 .box-movie p{
     margin: 0;
@@ -49,4 +52,16 @@ h1{
 .image-main{
     width: 100%;
     height: 20%;
+}
+.caroussel{
+    display: flex;
+    width: 100%;
+    border: red sold dotted
+}
+.btn-caroussel{
+    width: 5%;
+}
+section{
+    margin-top: 25px;
+
 }
