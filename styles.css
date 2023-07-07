@@ -112,3 +112,100 @@ section{
 section:hover .btn-caroussel {
     display: inline-block;
   }
+  /* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: scroll; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+  
+/* Modal Content/Box */
+.modal-content {
+    background-color: black;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    width: 50%; /* Could be more or less, depending on screen size */
+    height: 600px;
+}
+.modal-grid{
+    display: grid;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    grid-template-columns: 2fr 3fr 2fr;
+    grid-template-rows: 2fr 1/2fr 1fr 1fr;
+}
+.box-img{
+    grid-row-start: 2;
+    grid-row-end: 5;
+    width: 100%;
+}
+.box-img img{
+    width: 100%;
+
+}
+.box-title{
+    grid-column-start: 1;
+    grid-column-end: 4;
+    font-size: 60px;
+    text-align: center;
+}
+.box-group-one{
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 2;
+    grid-row-end: 5;
+}
+.box-group-two{
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 2;
+    grid-row-end: 5;
+}
+.box-synopsis{
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 3;
+    grid-row-end: 5;
+}
+.box-button{
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+.modal strong{
+    color: lightgray;
+    text-decoration: underline;
+}
+.modal p{
+    display: inline;
+}
+.box-group-one, .box-group-two{
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.modal-box{
+    padding-bottom: 15px;
+}

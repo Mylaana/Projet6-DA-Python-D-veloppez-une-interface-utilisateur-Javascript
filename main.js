@@ -44,17 +44,51 @@ class Category{
         let box = new boxMovie(movieBox, movieImage);
         this.boxMovieList.push(box);
     }
+    async checkImageError(imageUrl){
+        const response = await fetch(imageUrl);
+        return await response.json();
+    }
+    addMovieInList(fetchResult){
+        this.movieListFromAPI.push(fetchResult)
+        /*
+        let movieIndex = fetchResult.id
+        this.checkImageError(encodeURIComponent(fetchResult.image_url))
+        .then((response) => {
+            
+        })
+        .catch((error) =>{
+            console.log("erreur sur : " + fetchResult.image_url)
+            console.log(error)
+        });
+
+        if(1 == 2){
+            for (i in this.movieListFromAPI){
+                if (this.movieListFromAPI[i].id = movieIndex){
+                    this.movieListFromAPI.splice(i);
+                    this.displayMovieGroup();
+                    break;
+                }
+
+            }
+            
+        };
+        */
+        
+    }
     setFetchResult(fetchResponse){
         this.fetchResponse = fetchResponse
         for (i in this.fetchResponse.results){
-            this.movieListFromAPI.push(fetchResponse.results[i])
+            this.addMovieInList(fetchResponse.results[i])
         }
     }
     fillMovieList(){
         //checks if there are enough movies in movieListFromAPI
-        if (this.movieListFromAPI.length > this.carousselPage * movieBoxPerCategory
-            || this.fetchResponse.next == null){
+        if (this.movieListFromAPI.length > this.carousselPage * movieBoxPerCategory) {
             this.displayMovieGroup()
+        }
+        //buffering 1 page worth of movies in list
+        if (this.movieListFromAPI.length > (this.carousselPage + 1) * movieBoxPerCategory
+            || this.fetchResponse.next == null){
             return;
         }
         getDataFromAPI(this.fetchResponse.next)
@@ -64,8 +98,6 @@ class Category{
         })
     }
     displayMovieGroup(){
-        let firstFilmIndex = (this.carousselPage - 1) * movieBoxPerCategory + 1
-        let lastFilmIndex = this.carousselPage * movieBoxPerCategory
         let firstFilmIndexOffset = (this.carousselPage - 1) * movieBoxPerCategory
 
         for (i = 0; i <= movieBoxPerCategory-1; i++){
@@ -73,7 +105,7 @@ class Category{
             // only modify image source if enough images to display
             if (i <= this.movieListFromAPI.length - 1){
                 movieBox.imageSelector.setAttribute("src", this.movieListFromAPI[i + firstFilmIndexOffset].image_url);
-                movieBox.movieID = this.movieListFromAPI[i +firstFilmIndexOffset].id;
+                movieBox.movieResponse = this.movieListFromAPI[i +firstFilmIndexOffset];
                 movieBox.imageSelector.style.display = 'inline-block';
             }else{
                 movieBox.imageSelector.style.display = 'none';
@@ -87,7 +119,6 @@ class Category{
         }
     }
     clickPrevious(){
-
         if (this.carousselPage > 1){
             this.carousselPage--
         
@@ -96,10 +127,14 @@ class Category{
     }
 }
 class boxMovie{
-    constructor(divSelector, imageSelector, id){
+    constructor(divSelector, imageSelector){
         this.divSelector = divSelector;
         this.imageSelector = imageSelector;
-        this.movieID = id;
+        this.movieResponse = null;
+        this.imageSelector.addEventListener("click", this.displayModal.bind(this));
+    }
+    displayModal(){
+        displayModal(this.movieResponse.url)
     }
 }
 
@@ -191,3 +226,45 @@ getDataFromAPI(urlAPI + "genres/")
 	console.log('Une erreur est survenue :', err);
 });
 
+
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on the button, open the modal
+function displayModal(movieUrlAPI) {
+    response = getDataFromAPI(movieUrlAPI)
+    .then((response) => {
+        modal.style.display = "block";
+        console.log(response)
+        modal.querySelector("img").setAttribute("src", response.image_url)
+        modal.querySelector(".box-title").querySelector("p").textContent = response.title
+        modal.querySelector(".box-synopsis").querySelector("p").textContent = " " + response.long_description
+        modal.querySelector(".box-genres").querySelector("p").textContent = " " + response.genres
+        modal.querySelector(".box-group-one").querySelector(".box-casting").querySelector("p").textContent = " " + response.actors
+        modal.querySelector(".box-group-one").querySelector(".box-director").querySelector("p").textContent = " " + response.directors
+        modal.querySelector(".box-date").querySelector("p").textContent = " " + response.date_published
+        modal.querySelector(".box-group-two").querySelector(".box-duration").querySelector("p").textContent = " " + response.duration + "min"
+        modal.querySelector(".box-score").querySelector("p").textContent = " " + esponse.avg_vote
+        modal.querySelector(".box-score-imdb").querySelector("p").textContent = " " + response.imdb_score
+        modal.querySelector(".box-box-office").querySelector("p").textContent = " " + response.usa_grosss_income
+        modal.querySelector(".box-country").querySelector("p").textContent = " " + response.countries
+    })
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
