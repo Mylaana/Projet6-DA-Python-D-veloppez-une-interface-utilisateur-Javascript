@@ -142,7 +142,7 @@ section:hover .btn-caroussel {
     height: 100%;
     overflow: auto;
     grid-template-columns: 2fr 3fr 2fr;
-    grid-template-rows: 2fr 1/2fr 1fr 1fr;
+    grid-template-rows: 4fr 1fr 2fr 2fr;
 }
 .box-img{
     grid-row-start: 2;
