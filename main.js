@@ -23,6 +23,7 @@ class Category{
         this.id = null;
         this.title = null;
         this.fetchResponse = null; //type : Promise
+        this.alreadyFetched = [];
         this.boxMovieList = [];
         this.carousselPage = 1;
         this.movieListFromAPI = []; //contains dictionnaries of movie info {id:value, img-src:value}
@@ -48,55 +49,56 @@ class Category{
         const response = await fetch(imageUrl);
         return await response.json();
     }
+    checkImage(fetchResult) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                //do nothing
+            };
+            img.onerror = () => {
+                //remove movie from movieList
+                let index = this.movieListFromAPI.findIndex(item => item === fetchResult)
+                this.movieListFromAPI.splice(index,1);
+                this.fillMovieList();
+            };
+          img.src = fetchResult.image_url;
+        });
+      }
+            
     addMovieInList(fetchResult){
         this.movieListFromAPI.push(fetchResult)
-        /*
-        let movieIndex = fetchResult.id
-        this.checkImageError(encodeURIComponent(fetchResult.image_url))
-        .then((response) => {
-            
-        })
-        .catch((error) =>{
-            console.log("erreur sur : " + fetchResult.image_url)
-            console.log(error)
-        });
-
-        if(1 == 2){
-            for (i in this.movieListFromAPI){
-                if (this.movieListFromAPI[i].id = movieIndex){
-                    this.movieListFromAPI.splice(i);
-                    this.displayMovieGroup();
-                    break;
-                }
-
-            }
-            
-        };
-        */
-        
+        this.checkImage(fetchResult)   
     }
+
     setFetchResult(fetchResponse){
         this.fetchResponse = fetchResponse
         for (i in this.fetchResponse.results){
             this.addMovieInList(fetchResponse.results[i])
         }
     }
+
     fillMovieList(){
         //checks if there are enough movies in movieListFromAPI
         if (this.movieListFromAPI.length > this.carousselPage * movieBoxPerCategory) {
             this.displayMovieGroup()
         }
-        //buffering 1 page worth of movies in list
-        if (this.movieListFromAPI.length > (this.carousselPage + 1) * movieBoxPerCategory
+        //buffering 2 page worth of movies in list
+        if (this.movieListFromAPI.length > (this.carousselPage + 2) * movieBoxPerCategory
             || this.fetchResponse.next == null){
             return;
         }
-        getDataFromAPI(this.fetchResponse.next)
-        .then((response) => {
-            this.setFetchResult(response);
-            this.fillMovieList();           
-        })
+        if (this.alreadyFetched.includes(this.fetchResponse.next) == false){
+            this.alreadyFetched.push(this.fetchResponse.next)
+            getDataFromAPI(this.fetchResponse.next)
+            .then((response) => {
+                this.setFetchResult(response);
+                this.fillMovieList();
+            })
+        }else{
+        }
+        console.log(`length : ${this.movieListFromAPI.length} vs ${this.carousselPage * movieBoxPerCategory}`)
     }
+
     displayMovieGroup(){
         let firstFilmIndexOffset = (this.carousselPage - 1) * movieBoxPerCategory
 
@@ -155,7 +157,7 @@ function getUserFavouriteCategories(categoriesFromAPI = []){
     }else{
         favouriteCategories.push(categoriesFromAPI[0])
         favouriteCategories.push(categoriesFromAPI[2])
-        favouriteCategories.push(categoriesFromAPI[4])
+        favouriteCategories.push(categoriesFromAPI[3])
     }
     return favouriteCategories
 }
@@ -250,7 +252,7 @@ function displayModal(movieUrlAPI) {
         modal.querySelector(".box-group-one").querySelector(".box-director").querySelector("p").textContent = " " + response.directors
         modal.querySelector(".box-date").querySelector("p").textContent = " " + response.date_published
         modal.querySelector(".box-group-two").querySelector(".box-duration").querySelector("p").textContent = " " + response.duration + "min"
-        modal.querySelector(".box-score").querySelector("p").textContent = " " + esponse.avg_vote
+        modal.querySelector(".box-score").querySelector("p").textContent = " " + response.avg_vote
         modal.querySelector(".box-score-imdb").querySelector("p").textContent = " " + response.imdb_score
         modal.querySelector(".box-box-office").querySelector("p").textContent = " " + response.usa_grosss_income
         modal.querySelector(".box-country").querySelector("p").textContent = " " + response.countries
