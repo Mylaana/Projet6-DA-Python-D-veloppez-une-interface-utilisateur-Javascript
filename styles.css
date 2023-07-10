@@ -3,10 +3,6 @@ body{
     padding: 0;
     background-color: black;
     color: white;
-    /*
-    margin-left: 40px;
-    margin-right: 40px;
-    */
 }
 .container-main-movie{
     width: 90%;
@@ -111,7 +107,8 @@ section{
 }
 section:hover .btn-caroussel {
     display: inline-block;
-  }
+}
+
   /* The Modal (background) */
 .modal {
     display: none; /* Hidden by default */
@@ -129,11 +126,11 @@ section:hover .btn-caroussel {
 /* Modal Content/Box */
 .modal-content {
     background-color: black;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
     border-radius: 5px;
-    width: 50%; /* Could be more or less, depending on screen size */
+    width: 50%; 
     height: 600px;
 }
 .modal-grid{
