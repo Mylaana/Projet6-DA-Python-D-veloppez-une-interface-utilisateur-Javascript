@@ -27,10 +27,10 @@ class Category{
         this.boxMovieList = [];
         this.carousselPage = 1;
         this.movieListFromAPI = []; //contains dictionnaries of movie info {id:value, img-src:value}
-    }
+    };
     setTitle(title){
         this.title = title;
-        this.titleSelector.textContent = title
+        this.titleSelector.textContent = title;
     };
     createBoxContainer(){
         let movieBox = document.createElement("div");
@@ -44,11 +44,11 @@ class Category{
 
         let box = new boxMovie(movieBox, movieImage);
         this.boxMovieList.push(box);
-    }
+    };
     async checkImageError(imageUrl){
         const response = await fetch(imageUrl);
         return await response.json();
-    }
+    };
     checkImage(fetchResult) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -57,77 +57,76 @@ class Category{
             };
             img.onerror = () => {
                 //remove movie from movieList
-                let index = this.movieListFromAPI.findIndex(item => item === fetchResult)
+                let index = this.movieListFromAPI.findIndex(item => item === fetchResult);
                 this.movieListFromAPI.splice(index,1);
                 this.fillMovieList();
             };
           img.src = fetchResult.image_url;
         });
-      }
+      };
             
     addMovieInList(fetchResult){
-        this.movieListFromAPI.push(fetchResult)
-        this.checkImage(fetchResult)   
-    }
+        this.movieListFromAPI.push(fetchResult);
+        this.checkImage(fetchResult);
+    };
 
     setFetchResult(fetchResponse){
-        this.fetchResponse = fetchResponse
+        this.fetchResponse = fetchResponse;
         for (i in this.fetchResponse.results){
-            this.addMovieInList(fetchResponse.results[i])
-        }
-    }
+            this.addMovieInList(fetchResponse.results[i]);
+        };
+    };
 
     fillMovieList(){
         //checks if there are enough movies in movieListFromAPI
         if (this.movieListFromAPI.length > this.carousselPage * movieBoxPerCategory) {
-            this.displayMovieGroup()
-        }
+            this.displayMovieGroup();
+        };
         //buffering 2 page worth of movies in list
         if (this.movieListFromAPI.length > (this.carousselPage + 2) * movieBoxPerCategory
             || this.fetchResponse.next == null){
             return;
-        }
+        };
         if (this.alreadyFetched.includes(this.fetchResponse.next) == false){
-            this.alreadyFetched.push(this.fetchResponse.next)
+            this.alreadyFetched.push(this.fetchResponse.next);
             getDataFromAPI(this.fetchResponse.next)
             .then((response) => {
                 this.setFetchResult(response);
                 this.fillMovieList();
-            })
+            });
         }else{
-        }
-        console.log(`length : ${this.movieListFromAPI.length} vs ${this.carousselPage * movieBoxPerCategory}`)
-    }
+        };
+    };
 
     displayMovieGroup(){
-        let firstFilmIndexOffset = (this.carousselPage - 1) * movieBoxPerCategory
+        let firstMovieIndexOffset = (this.carousselPage - 1) * movieBoxPerCategory;
 
         for (i = 0; i <= movieBoxPerCategory-1; i++){
             let movieBox = this.boxMovieList[i];
             // only modify image source if enough images to display
             if (i <= this.movieListFromAPI.length - 1){
-                movieBox.imageSelector.setAttribute("src", this.movieListFromAPI[i + firstFilmIndexOffset].image_url);
-                movieBox.movieResponse = this.movieListFromAPI[i +firstFilmIndexOffset];
+                movieBox.imageSelector.setAttribute("src", this.movieListFromAPI[i + firstMovieIndexOffset].image_url);
+                movieBox.movieResponse = this.movieListFromAPI[i +firstMovieIndexOffset];
                 movieBox.imageSelector.style.display = 'inline-block';
             }else{
                 movieBox.imageSelector.style.display = 'none';
-            }
-        }
-    }
+            };
+        };
+    };
     clickNext(){
         if (this.fetchResponse.next != null){
-            this.carousselPage++
+            this.carousselPage++;
             this.fillMovieList();
-        }
-    }
+        };
+    };
     clickPrevious(){
         if (this.carousselPage > 1){
-            this.carousselPage--
+            this.carousselPage--;
         
-            this.displayMovieGroup()
-        }
-    }
-}
+            this.displayMovieGroup();
+        };
+    };
+};
 class boxMovie{
     constructor(divSelector, imageSelector){
         this.divSelector = divSelector;
@@ -136,14 +135,14 @@ class boxMovie{
         this.imageSelector.addEventListener("click", this.displayModal.bind(this));
     }
     displayModal(){
-        displayModal(this.movieResponse.url)
-    }
-}
+        displayModal(this.movieResponse.url);
+    };
+};
 
 async function getDataFromAPI(urlAPI) {
   const response = await fetch(urlAPI);
   return await response.json();
-}
+};
 
 function getUserFavouriteCategories(categoriesFromAPI = []){
     // dummy function to simulate user's preferences
@@ -155,12 +154,12 @@ function getUserFavouriteCategories(categoriesFromAPI = []){
             {"name": "default", "id": "0"}
         ];    
     }else{
-        favouriteCategories.push(categoriesFromAPI[0])
-        favouriteCategories.push(categoriesFromAPI[2])
-        favouriteCategories.push(categoriesFromAPI[3])
+        favouriteCategories.push(categoriesFromAPI[0]);
+        favouriteCategories.push(categoriesFromAPI[2]);
+        favouriteCategories.push(categoriesFromAPI[3]);
     }
-    return favouriteCategories
-}
+    return favouriteCategories;
+};
 
 function setUpCategories(categoriesListFromAPI){
     let categoriesList = getUserFavouriteCategories(categoriesListFromAPI);
@@ -172,40 +171,45 @@ function setUpCategories(categoriesListFromAPI){
         }else{
             category.setTitle(categoriesList[i-1].name);
             category.id = categoriesList[i-1].id;
-        }
+        };
         categories.push(category);       
-    }
+    };
 };
 
 function setUpMoviesInCategory(){
     for (let i in categories){
-        let category = categories[i]
-        let categoryUrl = ""
+        let category = categories[i];
+        let categoryUrl = "";
 
         if (i == 0){
-            categoryUrl = urlAPI + `titles/?sort_by=-imdb_score`
+            categoryUrl = urlAPI + `titles/?sort_by=-imdb_score`;
         }else{
-            categoryUrl = urlAPI + `titles/?genre=${category.title}`
+            categoryUrl = urlAPI + `titles/?genre=${category.title}`;
         };
 
         getDataFromAPI(categoryUrl)
         .then(function(response){
-            category.setFetchResult(response)
-            category.fillMovieList()
-            category.displayMovieGroup()
-            
+            category.setFetchResult(response);
+
             // set front page film
             if (i == 0){
-                setUpFrontPageFilm(category.movieListFromAPI[0])
+                setUpFrontPageMovie(category.movieListFromAPI[0]);
+                //removing first movie from top ranked to show on main image
+                category.movieListFromAPI.splice(0,1);
             }
-        })
-    }
+            category.fillMovieList();
+            category.displayMovieGroup();
+        });
+    };
 };
 
-function setUpFrontPageFilm(firstFilmResponse){
-    console.log(firstFilmResponse)
-    document.querySelector(".image-main").setAttribute("src", firstFilmResponse.image_url)
-    document.querySelector(".main-movie-title").textContent = firstFilmResponse.title
+function setUpFrontPageMovie(firstMovieResponse){
+    let movieBox = document.querySelector(".container-image-main");
+    let movieImage = movieBox.querySelector(".image-main");
+    movieImage.setAttribute("src", firstMovieResponse.image_url);
+    document.querySelector(".main-movie-title").textContent = firstMovieResponse.title;
+    var frontPageBox = new boxMovie(movieBox, movieImage);
+    frontPageBox.movieResponse = firstMovieResponse;
 }
 
 // page initialization
@@ -243,30 +247,29 @@ function displayModal(movieUrlAPI) {
     response = getDataFromAPI(movieUrlAPI)
     .then((response) => {
         modal.style.display = "block";
-        console.log(response)
-        modal.querySelector("img").setAttribute("src", response.image_url)
-        modal.querySelector(".box-title").querySelector("p").textContent = response.title
-        modal.querySelector(".box-synopsis").querySelector("p").textContent = " " + response.long_description
-        modal.querySelector(".box-genres").querySelector("p").textContent = " " + response.genres
-        modal.querySelector(".box-group-one").querySelector(".box-casting").querySelector("p").textContent = " " + response.actors
-        modal.querySelector(".box-group-one").querySelector(".box-director").querySelector("p").textContent = " " + response.directors
-        modal.querySelector(".box-date").querySelector("p").textContent = " " + response.date_published
-        modal.querySelector(".box-group-two").querySelector(".box-duration").querySelector("p").textContent = " " + response.duration + "min"
-        modal.querySelector(".box-score").querySelector("p").textContent = " " + response.avg_vote
-        modal.querySelector(".box-score-imdb").querySelector("p").textContent = " " + response.imdb_score
-        modal.querySelector(".box-box-office").querySelector("p").textContent = " " + response.usa_grosss_income
-        modal.querySelector(".box-country").querySelector("p").textContent = " " + response.countries
-    })
-}
+        modal.querySelector("img").setAttribute("src", response.image_url);
+        modal.querySelector(".box-title").querySelector("p").textContent = response.title;
+        modal.querySelector(".box-synopsis").querySelector("p").textContent = " " + response.long_description;
+        modal.querySelector(".box-genres").querySelector("p").textContent = " " + response.genres;
+        modal.querySelector(".box-group-one").querySelector(".box-casting").querySelector("p").textContent = " " + response.actors;
+        modal.querySelector(".box-group-one").querySelector(".box-director").querySelector("p").textContent = " " + response.directors;
+        modal.querySelector(".box-date").querySelector("p").textContent = " " + response.date_published;
+        modal.querySelector(".box-group-two").querySelector(".box-duration").querySelector("p").textContent = " " + response.duration + "min";
+        modal.querySelector(".box-score").querySelector("p").textContent = " " + response.avg_vote;
+        modal.querySelector(".box-score-imdb").querySelector("p").textContent = " " + response.imdb_score;
+        modal.querySelector(".box-box-office").querySelector("p").textContent = " " + response.usa_grosss_income;
+        modal.querySelector(".box-country").querySelector("p").textContent = " " + response.countries;
+    });
+};
 
 // When the user clicks on <span> (x), close the modal
 span.onclick = function() {
   modal.style.display = "none";
-}
+};
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
   if (event.target == modal) {
     modal.style.display = "none";
-  }
-}
+  };
+};
